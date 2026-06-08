@@ -1,0 +1,12 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.bkit/
+.claude/
+
+# 인프라 인계 번들(생성물)
+*-infra-handoff-*.zip
+_handoff_stage/

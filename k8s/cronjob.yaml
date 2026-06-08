@@ -1,0 +1,31 @@
+# 새벽 자동 학습 트리거 (개발계획서 §6.4)
+# 학습 로직은 invest-train Pod 안에서 실행되고, 이 CronJob 은 내부 서비스로
+# POST /train 만 호출하는 가벼운 트리거다.
+#
+# 스케줄 KST/UTC 주의: cron 은 UTC 기준. KST 04:30 = UTC 19:30(전일).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: invest-train-trigger
+  namespace: mlops
+spec:
+  schedule: "30 19 * * *"          # UTC 19:30 = KST 04:30 (새벽)
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: curl
+            image: curlimages/curl:8.8.0
+            # 클러스터 내부 서비스 DNS 로 직접 호출 (ALB/외부 경유 불필요)
+            # TRAIN_TOKEN 을 사용한다면 -H "X-Train-Token: <token>" 추가
+            args:
+              - "-s"
+              - "-X"
+              - "POST"
+              - "http://invest-train.mlops.svc.cluster.local:8080/train"

@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invest-train
+  namespace: mlops
+  labels:
+    app: invest-train
+spec:
+  # ⚠️ 반드시 1 — 인메모리 학습 락/상태 일관성 보장 (train_server.py 참조)
+  replicas: 1
+  selector:
+    matchLabels:
+      app: invest-train
+  template:
+    metadata:
+      labels:
+        app: invest-train
+    spec:
+      containers:
+      - name: invest-train
+        image: 891376975666.dkr.ecr.ap-northeast-2.amazonaws.com/invest-train:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MLFLOW_TRACKING_URI
+          value: "http://mlflow.mlflow.svc.cluster.local:80"
+        - name: MLFLOW_TRACKING_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-auth
+              key: username
+        - name: MLFLOW_TRACKING_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mlflow-auth
+              key: password
+        # ── 학습 데이터 (Athena)
+        - name: ATHENA_DB
+          value: "mlops"
+        - name: ATHENA_TABLE
+          value: "altinv_crel_train"
+        - name: ATHENA_S3_OUTPUT
+          value: "s3://s3-an2-mlops/athena/"
+        # ── MLflow 모델/실험
+        - name: MLFLOW_EXPERIMENT
+          value: "invest-crel-model"
+        - name: MODEL_CLS_NAME
+          value: "invest-crel-classification"
+        - name: MODEL_REG_NAME
+          value: "invest-crel-regression"
+        - name: MODEL_ALIAS
+          value: "champion"
+        # 초기 운영: 수동 승격 권장 (지표 확인 후 champion alias 부여)
+        - name: AUTO_PROMOTE_CHAMPION
+          value: "false"
+        # ── AWS
+        - name: S3_BUCKET
+          value: "s3-an2-mlops"
+        - name: AWS_REGION
+          value: "ap-northeast-2"
+        - name: AWS_DEFAULT_REGION
+          value: "ap-northeast-2"
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2"
+            memory: "6Gi"          # 학습 피크(XGBoost + DataFrame 적재) 대비 상향
+        readinessProbe:
+          httpGet:
+            path: /train/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /train/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 5         # 학습 중 readiness 흔들림 방지 (개발계획서 §6.3)
+          failureThreshold: 3

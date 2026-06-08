@@ -1,0 +1,30 @@
+# INVEST 모델 학습(Train) 패키지
+# pip install -r train_requirements.txt
+#
+# 추론(inference_requirements.txt) 대비 추가: awswrangler, matplotlib, seaborn
+# 동일 Docker 이미지에서 추론+학습을 함께 돌리려면 이 목록을 사용한다.
+
+# 데이터 처리
+pandas>=1.5.0
+numpy>=1.23.0
+awswrangler>=3.0.0       # Athena 조회 (SageMaker/Redshift 미사용)
+boto3>=1.26.0
+
+# 머신러닝
+scikit-learn>=1.2.0
+xgboost>=1.7.0
+joblib>=1.2.0
+
+# MLflow (Registry 등록 + 인코더 아티팩트)
+mlflow>=2.8.0
+
+# 시각화 (4종 차트 아티팩트)
+matplotlib>=3.6.0
+seaborn>=0.12.0
+
+# 유틸
+python-dotenv>=1.0.0
+pytz>=2024.1
+
+# (선택) 학습을 /train 엔드포인트로 트리거하는 경우, 추론 이미지의
+# fastapi / uvicorn 이 이미 포함되어 있으므로 별도 추가 불필요.

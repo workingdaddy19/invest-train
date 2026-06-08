@@ -1,0 +1,6 @@
+# invest-train 은 invest-app(추론)과 동일한 mlops 네임스페이스에 배포한다.
+# (mlflow-auth Secret, 공유 ALB 그룹을 함께 사용)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mlops

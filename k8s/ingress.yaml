@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: invest-train-ingress
+  namespace: mlops
+  annotations:
+    # invest-app(invest-inference-ingress)과 동일한 ALB 그룹을 공유한다.
+    # aws-load-balancer-controller 가 같은 group.name 의 Ingress 들을 하나의 ALB 로 병합.
+    alb.ingress.kubernetes.io/group.name: shared-alb
+    # group.order 가 작을수록 우선 평가. invest-app 의 catch-all '/'(order 10)보다
+    # 구체적 경로 '/train'(order 5)이 먼저 매칭되도록 더 낮은 값을 준다.
+    alb.ingress.kubernetes.io/group.order: "5"
+    alb.ingress.kubernetes.io/healthcheck-path: /train/health
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=4000
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    kubernetes.io/ingress.class: alb
+spec:
+  ingressClassName: alb
+  rules:
+  - host: api.mlops.click
+    http:
+      paths:
+      # http://api.mlops.click/train, /train/status, /train/health 가 모두 매칭됨
+      # (ALB 는 경로를 재작성하지 않고 그대로 백엔드에 전달)
+      - path: /train
+        pathType: Prefix
+        backend:
+          service:
+            name: invest-train
+            port:
+              number: 8080
