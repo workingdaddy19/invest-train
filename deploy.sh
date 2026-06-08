@@ -73,6 +73,13 @@ deploy_k8s() {
         error "mlflow-auth Secret이 없습니다.\n  kubectl create secret generic mlflow-auth \\\n    --from-literal=username=<id> --from-literal=password=<pw> \\\n    -n ${NAMESPACE}"
     fi
 
+    # ServiceAccount(IRSA) 확인 — Athena/S3 직접 호출 자격증명. 없으면 학습이
+    # 'Unable to locate credentials' 로 실패하므로 사전 차단.
+    # mlops 네임스페이스의 기존 학습용 IRSA(mlops-training) 재사용.
+    if ! kubectl get sa mlops-training -n "${NAMESPACE}" &>/dev/null; then
+        error "ServiceAccount 'mlops-training' 없음 — 인프라팀에 확인 요청 (iam-role-mlops-training IRSA)"
+    fi
+
     kubectl apply -f k8s/deployment.yaml
     kubectl apply -f k8s/service.yaml
     kubectl apply -f k8s/ingress.yaml

@@ -16,6 +16,10 @@ spec:
       labels:
         app: invest-train
     spec:
+      # AWS 자격증명: Athena/S3 직접 호출(awswrangler) 위해 IRSA 필수.
+      # mlops 네임스페이스의 기존 학습용 IRSA 재사용
+      # (role: iam-role-mlops-training). 신규 SA 생성 불필요.
+      serviceAccountName: mlops-training
       containers:
       - name: invest-train
         image: 891376975666.dkr.ecr.ap-northeast-2.amazonaws.com/invest-train:latest
