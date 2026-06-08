@@ -6,7 +6,7 @@
 #         (inference.py 의 ModelStore._load_encoders 가 로드)
 #
 # 실행 방식
-#   1) CLI / K8s CronJob :  python invest_train.py
+#   1) CLI / 배치 Job   :  python invest_train.py
 #   2) /train 엔드포인트 :  from invest_train import run_training; run_training(...)
 # ============================================================
 

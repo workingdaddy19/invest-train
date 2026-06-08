@@ -43,7 +43,7 @@ bash deploy.sh --build    # Docker 빌드 + ECR 푸시
 bash deploy.sh --deploy   # K8s 매니페스트만 적용
 ```
 
-적용되는 매니페스트: `deployment.yaml`, `service.yaml`, `ingress.yaml`, `cronjob.yaml`
+적용되는 매니페스트: `deployment.yaml`, `service.yaml`, `ingress.yaml`
 
 ---
 
@@ -61,8 +61,9 @@ curl -s -X POST -H "Host: api.mlops.click" http://api.mlops.click/train
 curl -s      -H "Host: api.mlops.click" http://api.mlops.click/train/status
 ```
 
-새벽 자동 학습은 `k8s/cronjob.yaml`(UTC 19:30 = KST 04:30)이 내부 서비스로
-`POST /train`을 호출한다.
+새벽 자동 학습은 **사내 표준 스케줄러**가 `POST /train`(외부 `api.mlops.click/train`
+또는 내부 `invest-train.mlops.svc.cluster.local:8080/train`)을 호출하는 방식으로 트리거한다.
+(클러스터 내 K8s CronJob 미사용 — 사내 정책)
 
 ---
 

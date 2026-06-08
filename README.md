@@ -32,7 +32,7 @@ invest-app(추론 API)과 **분리된 독립 컨테이너**로, 학습(`invest_t
 | `requirements.txt` | 학습 + API 서버 통합 패키지 |
 | `Dockerfile` | python:3.11-slim + xgboost/한글폰트, `uvicorn train_server:app` |
 | `deploy.sh` | 빌드/ECR 푸시/K8s 배포/학습 트리거 |
-| `k8s/` | Deployment, Service, Ingress(공유 ALB), CronJob, Secret 템플릿 |
+| `k8s/` | Deployment, Service, Ingress(공유 ALB), Secret 템플릿 |
 
 ---
 
@@ -80,8 +80,9 @@ curl -s -H "Host: api.mlops.click" http://api.mlops.click/train/status
 - Dockerfile CMD: `--workers 1`
 - Deployment: `replicas: 1`
 
-부하가 커지면 동일 이미지를 K8s CronJob(별도 Job Pod)으로 `python invest_train.py`
-직접 실행하는 방식으로 무중단 전환할 수 있다(`run_training()` 함수 경계 유지).
+학습 스케줄링은 컨테이너에 내장하지 않고 **사내 표준 스케줄러가 `POST /train`을 호출**한다
+(클러스터 내 K8s CronJob 미사용 — 사내 정책). 부하가 커지면 동일 이미지를 배치 Job(별도 Pod)에서
+`python invest_train.py`로 직접 실행하는 방식으로도 전환 가능하다(`run_training()` 함수 경계 유지).
 
 ---
 

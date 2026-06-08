@@ -40,7 +40,7 @@ logger = logging.getLogger("train_server")
 KST = pytz.timezone("Asia/Seoul")
 
 # ── 보안: TRAIN_TOKEN 이 설정되면 X-Train-Token 헤더 일치를 요구 (선택)
-#    내부 스케줄러(CronJob)만 호출하도록 토큰 보호 (개발계획서 §5.2)
+#    사내 스케줄러만 호출하도록 토큰 보호 (개발계획서 §5.2)
 TRAIN_TOKEN = os.getenv("TRAIN_TOKEN", "").strip()
 
 # ── 학습 동시 실행 방지 + 마지막 결과 보관

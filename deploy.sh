@@ -76,7 +76,6 @@ deploy_k8s() {
     kubectl apply -f k8s/deployment.yaml
     kubectl apply -f k8s/service.yaml
     kubectl apply -f k8s/ingress.yaml
-    kubectl apply -f k8s/cronjob.yaml
     success "매니페스트 적용 완료"
 
     step "롤아웃 대기 (최대 3분)"

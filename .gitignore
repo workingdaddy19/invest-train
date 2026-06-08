@@ -10,3 +10,6 @@ __pycache__/
 # 인프라 인계 번들(생성물)
 *-infra-handoff-*.zip
 _handoff_stage/
+
+# PDCA 문서는 로컬 보관, GitHub 저장소에는 미포함 (원격 정책)
+docs/
